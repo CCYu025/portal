@@ -17,7 +17,7 @@
 
     /* ── Header ── */
     header {
-      padding: 56px 40px 40px;
+      padding: 40px 40px 32px;
       text-align: center;
       border-bottom: 1px solid #1e293b;
     }
@@ -33,12 +33,11 @@
       border-radius: 2px;
     }
 
-    .brand {
+    .brand-logo {
       display: block;
-      font-size: 38px;
-      font-weight: 800;
-      color: #60a5fa;
-      letter-spacing: 4px;
+      height: 72px;
+      width: auto;
+      margin: 0 auto;
     }
 
     .brand-sub {
@@ -48,12 +47,6 @@
       color: #94a3b8;
       letter-spacing: 2px;
       margin-top: 6px;
-    }
-
-    header p {
-      margin-top: 18px;
-      font-size: 14px;
-      color: #475569;
     }
 
     /* ── Main content ── */
@@ -223,7 +216,7 @@
     /* 手機橫向（481px ~ 599px） */
     @media (max-width: 599px) {
       header         { padding: 28px 20px 24px; }
-      .brand         { font-size: 28px; letter-spacing: 2px; }
+      .brand-logo    { height: 52px; }
       .brand-sub     { font-size: 14px; }
       main           { padding: 24px 16px 40px; }
       .category      { margin-bottom: 32px; }
@@ -234,7 +227,7 @@
     /* 手機直向（≤ 480px） */
     @media (max-width: 480px) {
       header         { padding: 28px 16px 24px; }
-      .brand         { font-size: 24px; letter-spacing: 2px; }
+      .brand-logo    { height: 44px; }
       .brand-sub     { font-size: 13px; }
       main           { padding: 24px 16px 36px; }
       .category      { margin-bottom: 28px; }
@@ -249,10 +242,9 @@
 
   <header>
     <h1>
-      <span class="brand">YU FENG</span>
+      <img src="logo.png" alt="YU FENG" class="brand-logo">
       <span class="brand-sub">技術部系統入口</span>
     </h1>
-    <p>內部系統與文件統一入口</p>
   </header>
 
   <main>
