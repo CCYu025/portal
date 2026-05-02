@@ -84,7 +84,7 @@ portal/
 ### 公司文檔
 | 卡片 | Badge | URL | 開啟方式 |
 |------|-------|-----|---------|
-| 公司文件庫 — Google Drive 公司內部文件資料夾 | 雲端存取 (green) | Google Drive folder link | 新分頁 |
+| 公司文件庫 — 公司內部文件索引入口 | 需公司 VPN (blue) | `http://100.125.194.119:8000/doc/文件導覽.html` | 新分頁 |
 
 ---
 
@@ -140,3 +140,6 @@ portal/
 | 2026-05-02 | 新增「專案紀錄」分類；加入毅豐專案紀錄卡片（ccyu025.github.io/ProjectRecords） |
 | 2026-05-02 | 全面排版改善：修正 badge flex 拉伸 bug、auto-fit grid、3 段響應式斷點（768/599/480px）、高齡友善字體放大、術語去技術化（Tailscale→公司VPN）、觸控 active 回饋、hover 限滑鼠裝置 |
 | 2026-05-02 | 資料夾由 mes-portal → yf-portal → portal（抽象化，移除公司代號） |
+| 2026-05-02 | 公司文件庫卡片改為連結至 MES 伺服器 /doc/文件導覽.html；badge 改為需公司 VPN（藍色） |
+| 2026-05-02 | 標題改為「YU FENG 技術部系統入口」 |
+| 2026-05-02 | 全面視覺改善：favicon（藍底YF）、雙層標題（YU FENG 品牌色 + 副標）、accent line、Badge 移至標題右側同行、公開系統改綠色按鈕、VPN 提示欄移至 main 頂部 |

@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>YF 工程系統入口</title>
+  <title>YU FENG 技術部系統入口</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%233b82f6'/><text x='50%25' y='54%25' font-size='16' font-weight='bold' font-family='Arial' text-anchor='middle' dominant-baseline='middle' fill='white'>YF</text></svg>">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -16,28 +17,54 @@
 
     /* ── Header ── */
     header {
-      padding: 48px 40px 32px;
+      padding: 56px 40px 40px;
       text-align: center;
       border-bottom: 1px solid #1e293b;
     }
 
-    header h1 {
-      font-size: 28px;
-      font-weight: 700;
-      color: #f8fafc;
-      letter-spacing: 0.5px;
+    /* accent line after h1 */
+    header h1::after {
+      content: '';
+      display: block;
+      width: 48px;
+      height: 2px;
+      background: linear-gradient(90deg, #3b82f6, #818cf8);
+      margin: 14px auto 0;
+      border-radius: 2px;
+    }
+
+    .brand {
+      display: block;
+      font-size: 38px;
+      font-weight: 800;
+      color: #60a5fa;
+      letter-spacing: 4px;
+    }
+
+    .brand-sub {
+      display: block;
+      font-size: 16px;
+      font-weight: 500;
+      color: #94a3b8;
+      letter-spacing: 2px;
+      margin-top: 6px;
     }
 
     header p {
-      margin-top: 6px;
+      margin-top: 18px;
       font-size: 14px;
-      color: #64748b;
+      color: #475569;
     }
 
-    /* ── VPN notice ── */
-    .vpn-notice {
+    /* ── Main content ── */
+    main {
       max-width: 860px;
-      margin: 20px auto 0;
+      margin: 0 auto;
+      padding: 40px 24px 64px;
+    }
+
+    /* ── VPN notice（移至 main 頂部） ── */
+    .vpn-notice {
       background: #1a2744;
       border: 1px solid #1e40af;
       border-radius: 8px;
@@ -49,14 +76,7 @@
       flex-wrap: wrap;
       gap: 6px;
       line-height: 1.6;
-      text-align: left;
-    }
-
-    /* ── Main content ── */
-    main {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 40px 24px 64px;
+      margin-bottom: 36px;
     }
 
     /* ── Category section ── */
@@ -101,12 +121,10 @@
       gap: 10px;
     }
 
-    /* 按下觸覺回饋（觸控裝置） */
     .card:active {
       background: #263348;
     }
 
-    /* hover 效果僅限滑鼠裝置 */
     @media (hover: hover) and (pointer: fine) {
       .card {
         transition: border-color 0.2s, transform 0.15s;
@@ -122,11 +140,20 @@
       line-height: 1;
     }
 
-    .card h3 {
+    /* ── Card header row（標題 + badge 同行） ── */
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .card-header h3 {
       font-size: 18px;
       font-weight: 700;
       color: #f1f5f9;
-      margin-top: 4px;
+      flex: 1;
     }
 
     .card p {
@@ -138,14 +165,15 @@
 
     /* ── Badges ── */
     .badge {
-      align-self: flex-start;
       display: inline-block;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.6px;
       text-transform: uppercase;
       padding: 3px 10px;
       border-radius: 999px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .badge-blue  { background: #1e3a8a; color: #93c5fd; }
@@ -172,21 +200,31 @@
 
     .btn:active { background: #1d4ed8; }
 
+    /* 公開存取系統 — 綠色按鈕 */
+    .btn-green { background: #16a34a; }
+
+    @media (hover: hover) and (pointer: fine) {
+      .btn-green:hover { background: #15803d; }
+    }
+
+    .btn-green:active { background: #166534; }
+
     /* ════════════════════════════════
        響應式斷點
     ════════════════════════════════ */
 
     /* 平板直向（600px ~ 768px） */
     @media (max-width: 768px) {
-      header { padding: 36px 24px 28px; }
+      header { padding: 40px 24px 32px; }
       main   { padding: 32px 20px 48px; }
       .grid  { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
     }
 
     /* 手機橫向（481px ~ 599px） */
     @media (max-width: 599px) {
-      header         { padding: 20px 20px 16px; }
-      header h1      { font-size: 22px; }
+      header         { padding: 28px 20px 24px; }
+      .brand         { font-size: 28px; letter-spacing: 2px; }
+      .brand-sub     { font-size: 14px; }
       main           { padding: 24px 16px 40px; }
       .category      { margin-bottom: 32px; }
       .grid          { grid-template-columns: repeat(2, 1fr); }
@@ -195,29 +233,34 @@
 
     /* 手機直向（≤ 480px） */
     @media (max-width: 480px) {
-      header         { padding: 24px 16px 20px; }
-      header h1      { font-size: 20px; }
+      header         { padding: 28px 16px 24px; }
+      .brand         { font-size: 24px; letter-spacing: 2px; }
+      .brand-sub     { font-size: 13px; }
       main           { padding: 24px 16px 36px; }
       .category      { margin-bottom: 28px; }
       .grid          { grid-template-columns: 1fr; }
       .card          { padding: 20px; }
       .btn           { padding: 16px 0; font-size: 17px; }
-      .card h3       { font-size: 19px; }
+      .card-header h3 { font-size: 19px; }
     }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>YF 工程系統入口</h1>
+    <h1>
+      <span class="brand">YU FENG</span>
+      <span class="brand-sub">技術部系統入口</span>
+    </h1>
     <p>內部系統與文件統一入口</p>
+  </header>
+
+  <main>
+
     <div class="vpn-notice">
       <span>⚠</span>
       <span>標示「需公司 VPN」的系統，請先連接公司網路後再開啟。</span>
     </div>
-  </header>
-
-  <main>
 
     <!-- 生產監控系統 -->
     <section class="category">
@@ -226,8 +269,10 @@
 
         <div class="card">
           <div class="card-icon">🤖</div>
-          <span class="badge badge-blue">需公司 VPN</span>
-          <h3>MES System V2</h3>
+          <div class="card-header">
+            <h3>MES System V2</h3>
+            <span class="badge badge-blue">需公司 VPN</span>
+          </div>
           <p>機械手臂生產監控系統</p>
           <a class="btn" href="http://100.125.194.119:8000" target="_blank" rel="noopener">開啟系統</a>
         </div>
@@ -242,10 +287,12 @@
 
         <div class="card">
           <div class="card-icon">📋</div>
-          <span class="badge badge-green">公開存取</span>
-          <h3>毅豐專案紀錄</h3>
+          <div class="card-header">
+            <h3>毅豐專案紀錄</h3>
+            <span class="badge badge-green">公開存取</span>
+          </div>
           <p>專案進度追蹤與紀錄平台</p>
-          <a class="btn" href="https://ccyu025.github.io/ProjectRecords/" target="_blank" rel="noopener">開啟紀錄</a>
+          <a class="btn btn-green" href="https://ccyu025.github.io/ProjectRecords/" target="_blank" rel="noopener">開啟紀錄</a>
         </div>
 
       </div>
@@ -258,10 +305,12 @@
 
         <div class="card">
           <div class="card-icon">📁</div>
-          <span class="badge badge-green">雲端存取</span>
-          <h3>公司文件庫</h3>
-          <p>Google Drive 公司內部文件資料夾</p>
-          <a class="btn" href="https://drive.google.com/drive/folders/1lMCqTZwvxC-pFxy7tOtViqq7w-dinoPp?usp=drive_link" target="_blank" rel="noopener">開啟文件庫</a>
+          <div class="card-header">
+            <h3>公司文件庫</h3>
+            <span class="badge badge-blue">需公司 VPN</span>
+          </div>
+          <p>公司內部文件索引入口</p>
+          <a class="btn" href="http://100.125.194.119:8000/doc/文件導覽.html" target="_blank" rel="noopener">開啟文件導覽</a>
         </div>
 
       </div>
