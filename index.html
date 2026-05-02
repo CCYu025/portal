@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YF 工程系統入口</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #0f172a;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      color: #e2e8f0;
+    }
+
+    /* ── Header ── */
+    header {
+      padding: 48px 40px 32px;
+      text-align: center;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #f8fafc;
+      letter-spacing: 0.5px;
+    }
+
+    header p {
+      margin-top: 6px;
+      font-size: 14px;
+      color: #64748b;
+    }
+
+    /* ── VPN notice ── */
+    .vpn-notice {
+      max-width: 860px;
+      margin: 20px auto 0;
+      background: #1a2744;
+      border: 1px solid #1e40af;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 14px;
+      color: #93c5fd;
+      display: flex;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 6px;
+      line-height: 1.6;
+      text-align: left;
+    }
+
+    /* ── Main content ── */
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 40px 24px 64px;
+    }
+
+    /* ── Category section ── */
+    .category {
+      margin-bottom: 48px;
+    }
+
+    .category-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .category-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #1e293b;
+    }
+
+    /* ── Card grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* 按下觸覺回饋（觸控裝置） */
+    .card:active {
+      background: #263348;
+    }
+
+    /* hover 效果僅限滑鼠裝置 */
+    @media (hover: hover) and (pointer: fine) {
+      .card {
+        transition: border-color 0.2s, transform 0.15s;
+      }
+      .card:hover {
+        border-color: #3b82f6;
+        transform: translateY(-2px);
+      }
+    }
+
+    .card-icon {
+      font-size: 32px;
+      line-height: 1;
+    }
+
+    .card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-top: 4px;
+    }
+
+    .card p {
+      font-size: 15px;
+      color: #64748b;
+      flex: 1;
+      line-height: 1.5;
+    }
+
+    /* ── Badges ── */
+    .badge {
+      align-self: flex-start;
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+
+    .badge-blue  { background: #1e3a8a; color: #93c5fd; }
+    .badge-green { background: #14532d; color: #86efac; }
+
+    /* ── Button ── */
+    .btn {
+      display: block;
+      background: #3b82f6;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 12px 0;
+      border-radius: 10px;
+      text-align: center;
+      text-decoration: none;
+      margin-top: 8px;
+      transition: background 0.2s;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .btn:hover { background: #2563eb; }
+    }
+
+    .btn:active { background: #1d4ed8; }
+
+    /* ════════════════════════════════
+       響應式斷點
+    ════════════════════════════════ */
+
+    /* 平板直向（600px ~ 768px） */
+    @media (max-width: 768px) {
+      header { padding: 36px 24px 28px; }
+      main   { padding: 32px 20px 48px; }
+      .grid  { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    }
+
+    /* 手機橫向（481px ~ 599px） */
+    @media (max-width: 599px) {
+      header         { padding: 20px 20px 16px; }
+      header h1      { font-size: 22px; }
+      main           { padding: 24px 16px 40px; }
+      .category      { margin-bottom: 32px; }
+      .grid          { grid-template-columns: repeat(2, 1fr); }
+      .card          { padding: 18px; }
+    }
+
+    /* 手機直向（≤ 480px） */
+    @media (max-width: 480px) {
+      header         { padding: 24px 16px 20px; }
+      header h1      { font-size: 20px; }
+      main           { padding: 24px 16px 36px; }
+      .category      { margin-bottom: 28px; }
+      .grid          { grid-template-columns: 1fr; }
+      .card          { padding: 20px; }
+      .btn           { padding: 16px 0; font-size: 17px; }
+      .card h3       { font-size: 19px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>YF 工程系統入口</h1>
+    <p>內部系統與文件統一入口</p>
+    <div class="vpn-notice">
+      <span>⚠</span>
+      <span>標示「需公司 VPN」的系統，請先連接公司網路後再開啟。</span>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- 生產監控系統 -->
+    <section class="category">
+      <h2 class="category-title">生產監控系統</h2>
+      <div class="grid">
+
+        <div class="card">
+          <div class="card-icon">🤖</div>
+          <span class="badge badge-blue">需公司 VPN</span>
+          <h3>MES System V2</h3>
+          <p>機械手臂生產監控系統</p>
+          <a class="btn" href="http://100.125.194.119:8000" target="_blank" rel="noopener">開啟系統</a>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 專案紀錄 -->
+    <section class="category">
+      <h2 class="category-title">專案紀錄</h2>
+      <div class="grid">
+
+        <div class="card">
+          <div class="card-icon">📋</div>
+          <span class="badge badge-green">公開存取</span>
+          <h3>毅豐專案紀錄</h3>
+          <p>專案進度追蹤與紀錄平台</p>
+          <a class="btn" href="https://ccyu025.github.io/ProjectRecords/" target="_blank" rel="noopener">開啟紀錄</a>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 公司文檔 -->
+    <section class="category">
+      <h2 class="category-title">公司文檔</h2>
+      <div class="grid">
+
+        <div class="card">
+          <div class="card-icon">📁</div>
+          <span class="badge badge-green">雲端存取</span>
+          <h3>公司文件庫</h3>
+          <p>Google Drive 公司內部文件資料夾</p>
+          <a class="btn" href="https://drive.google.com/drive/folders/1lMCqTZwvxC-pFxy7tOtViqq7w-dinoPp?usp=drive_link" target="_blank" rel="noopener">開啟文件庫</a>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+</body>
+</html>
