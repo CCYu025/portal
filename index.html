@@ -5,14 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>YU FENG 技術部系統入口</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%233b82f6'/><text x='50%25' y='54%25' font-size='16' font-weight='bold' font-family='Arial' text-anchor='middle' dominant-baseline='middle' fill='white'>YF</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      min-height: 100vh;
+      min-height: 100dvh;
       background: #0f172a;
-      font-family: "Segoe UI", system-ui, sans-serif;
+      font-family: "Fira Sans", "Segoe UI", system-ui, sans-serif;
       color: #e2e8f0;
+      color-scheme: dark;
     }
 
     /* ── Header ── */
@@ -112,6 +116,7 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
+      cursor: default;
     }
 
     .card:active {
@@ -120,17 +125,32 @@
 
     @media (hover: hover) and (pointer: fine) {
       .card {
-        transition: border-color 0.2s, transform 0.15s;
+        transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
       }
       .card:hover {
         border-color: #3b82f6;
         transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.12);
       }
     }
 
+    @media (prefers-reduced-motion: reduce) {
+      .card, .btn { transition: none !important; }
+    }
+
     .card-icon {
-      font-size: 32px;
-      line-height: 1;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #60a5fa;
+    }
+
+    .card-icon svg {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
     }
 
     /* ── Card header row（標題 + badge 同行） ── */
@@ -177,6 +197,7 @@
       display: block;
       background: #3b82f6;
       color: #fff;
+      font-family: inherit;
       font-size: 16px;
       font-weight: 600;
       padding: 12px 0;
@@ -185,6 +206,12 @@
       text-decoration: none;
       margin-top: 8px;
       transition: background 0.2s;
+      cursor: pointer;
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid #93c5fd;
+      outline-offset: 2px;
     }
 
     @media (hover: hover) and (pointer: fine) {
@@ -201,6 +228,10 @@
     }
 
     .btn-green:active { background: #166534; }
+
+    .btn-green:focus-visible {
+      outline-color: #86efac;
+    }
 
     /* ════════════════════════════════
        響應式斷點
@@ -250,7 +281,7 @@
   <main>
 
     <div class="vpn-notice">
-      <span>⚠</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;margin-top:2px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       <span>標示「需公司 VPN」的系統，請先連接公司網路後再開啟。</span>
     </div>
 
@@ -260,7 +291,9 @@
       <div class="grid">
 
         <div class="card">
-          <div class="card-icon">🤖</div>
+          <div class="card-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+          </div>
           <div class="card-header">
             <h3>MES System V2</h3>
             <span class="badge badge-blue">需公司 VPN</span>
@@ -278,7 +311,9 @@
       <div class="grid">
 
         <div class="card">
-          <div class="card-icon">📁</div>
+          <div class="card-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          </div>
           <div class="card-header">
             <h3>公司文件庫</h3>
             <span class="badge badge-blue">需公司 VPN</span>
@@ -296,7 +331,9 @@
       <div class="grid">
 
         <div class="card">
-          <div class="card-icon">📋</div>
+          <div class="card-icon" aria-hidden="true" style="color:#4ade80">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </div>
           <div class="card-header">
             <h3>毅豐專案紀錄</h3>
             <span class="badge badge-green">公開存取</span>
