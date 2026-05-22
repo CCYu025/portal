@@ -1,4 +1,4 @@
-# portal — CLAUDE.md
+# portal — AGENTS.md
 
 ## 專案定位
 
@@ -22,8 +22,8 @@
 portal/
 ├── index.html       ← 唯一主要檔案，所有樣式與結構皆內嵌
 ├── logo.png         ← Header Logo 圖片
-└── .claude/
-    └── CLAUDE.md    ← 本文件
+└── .Codex/
+    └── AGENTS.md    ← 本文件
 ```
 
 ---
@@ -136,7 +136,7 @@ portal/
 
 | 日期 | 變更內容 |
 |------|---------|
-| 2026-05-01 | 建立初版：單一 MES 卡片入口頁，建立 CLAUDE.md |
+| 2026-05-01 | 建立初版：單一 MES 卡片入口頁，建立 AGENTS.md |
 | 2026-05-02 | 重構為多分類入口頁；新增公司文檔、專案紀錄分類 |
 | 2026-05-02 | 全面排版改善：響應式斷點、badge 修正、觸控回饋、hover 限滑鼠裝置 |
 | 2026-05-02 | 全面視覺改善：favicon、雙層標題、accent line、badge 移至標題旁、按鈕分色（VPN藍／公開綠）、VPN 提示欄移至 main 頂部 |
