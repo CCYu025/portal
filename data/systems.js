@@ -31,7 +31,7 @@ export const SYSTEMS = [
     id: 'company-docs',
     name: '公司文件庫',
     desc: '內部文件索引、操作手冊與維運文件',
-    url: 'http://100.82.186.54:8000/doc/',
+    url: 'http://100.82.186.54:8000/doc/文件導覽.html',
     healthUrl: 'http://100.82.186.54:8000',
     category: 'documents',
     icon: 'folder',
