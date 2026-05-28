@@ -1,351 +1,105 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>YU FENG 技術部系統入口</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%233b82f6'/><text x='50%25' y='54%25' font-size='16' font-weight='bold' font-family='Arial' text-anchor='middle' dominant-baseline='middle' fill='white'>YF</text></svg>">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      min-height: 100dvh;
-      background: #0f172a;
-      font-family: "Fira Sans", "Segoe UI", system-ui, sans-serif;
-      color: #e2e8f0;
-      color-scheme: dark;
-    }
-
-    /* ── Header ── */
-    header {
-      padding: 40px 40px 32px;
-      text-align: center;
-      border-bottom: 1px solid #1e293b;
-    }
-
-    /* accent line after h1 */
-    header h1::after {
-      content: '';
-      display: block;
-      width: 48px;
-      height: 2px;
-      background: linear-gradient(90deg, #3b82f6, #818cf8);
-      margin: 14px auto 0;
-      border-radius: 2px;
-    }
-
-    .brand-logo {
-      display: block;
-      height: 72px;
-      width: auto;
-      margin: 0 auto;
-    }
-
-    .brand-sub {
-      display: block;
-      font-size: 16px;
-      font-weight: 500;
-      color: #94a3b8;
-      letter-spacing: 2px;
-      margin-top: 6px;
-    }
-
-    /* ── Main content ── */
-    main {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 40px 24px 64px;
-    }
-
-    /* ── VPN notice（移至 main 頂部） ── */
-    .vpn-notice {
-      background: #1a2744;
-      border: 1px solid #1e40af;
-      border-radius: 8px;
-      padding: 10px 16px;
-      font-size: 14px;
-      color: #93c5fd;
-      display: flex;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      gap: 6px;
-      line-height: 1.6;
-      margin-bottom: 36px;
-    }
-
-    /* ── Category section ── */
-    .category {
-      margin-bottom: 48px;
-    }
-
-    .category-title {
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: #94a3b8;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .category-title::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: #1e293b;
-    }
-
-    /* ── Card grid ── */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 16px;
-    }
-
-    /* ── Card ── */
-    .card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 14px;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      cursor: default;
-    }
-
-    .card:active {
-      background: #263348;
-    }
-
-    @media (hover: hover) and (pointer: fine) {
-      .card {
-        transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
-      }
-      .card:hover {
-        border-color: #3b82f6;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.12);
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .card, .btn { transition: none !important; }
-    }
-
-    .card-icon {
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #60a5fa;
-    }
-
-    .card-icon svg {
-      width: 32px;
-      height: 32px;
-      flex-shrink: 0;
-    }
-
-    /* ── Card header row（標題 + badge 同行） ── */
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .card-header h3 {
-      font-size: 18px;
-      font-weight: 700;
-      color: #f1f5f9;
-      flex: 1;
-    }
-
-    .card p {
-      font-size: 15px;
-      color: #64748b;
-      flex: 1;
-      line-height: 1.5;
-    }
-
-    /* ── Badges ── */
-    .badge {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.6px;
-      text-transform: uppercase;
-      padding: 3px 10px;
-      border-radius: 999px;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .badge-blue  { background: #1e3a8a; color: #93c5fd; }
-    .badge-green { background: #14532d; color: #86efac; }
-
-    /* ── Button ── */
-    .btn {
-      display: block;
-      background: #3b82f6;
-      color: #fff;
-      font-family: inherit;
-      font-size: 16px;
-      font-weight: 600;
-      padding: 12px 0;
-      border-radius: 10px;
-      text-align: center;
-      text-decoration: none;
-      margin-top: 8px;
-      transition: background 0.2s;
-      cursor: pointer;
-    }
-
-    .btn:focus-visible {
-      outline: 2px solid #93c5fd;
-      outline-offset: 2px;
-    }
-
-    @media (hover: hover) and (pointer: fine) {
-      .btn:hover { background: #2563eb; }
-    }
-
-    .btn:active { background: #1d4ed8; }
-
-    /* 公開存取系統 — 綠色按鈕 */
-    .btn-green { background: #16a34a; }
-
-    @media (hover: hover) and (pointer: fine) {
-      .btn-green:hover { background: #15803d; }
-    }
-
-    .btn-green:active { background: #166534; }
-
-    .btn-green:focus-visible {
-      outline-color: #86efac;
-    }
-
-    /* ════════════════════════════════
-       響應式斷點
-    ════════════════════════════════ */
-
-    /* 平板直向（600px ~ 768px） */
-    @media (max-width: 768px) {
-      header { padding: 40px 24px 32px; }
-      main   { padding: 32px 20px 48px; }
-      .grid  { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-    }
-
-    /* 手機橫向（481px ~ 599px） */
-    @media (max-width: 599px) {
-      header         { padding: 28px 20px 24px; }
-      .brand-logo    { height: 52px; }
-      .brand-sub     { font-size: 14px; }
-      main           { padding: 24px 16px 40px; }
-      .category      { margin-bottom: 32px; }
-      .grid          { grid-template-columns: repeat(2, 1fr); }
-      .card          { padding: 18px; }
-    }
-
-    /* 手機直向（≤ 480px） */
-    @media (max-width: 480px) {
-      header         { padding: 28px 16px 24px; }
-      .brand-logo    { height: 44px; }
-      .brand-sub     { font-size: 13px; }
-      main           { padding: 24px 16px 36px; }
-      .category      { margin-bottom: 28px; }
-      .grid          { grid-template-columns: 1fr; }
-      .card          { padding: 20px; }
-      .btn           { padding: 16px 0; font-size: 17px; }
-      .card-header h3 { font-size: 19px; }
-    }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="YU FENG 內部系統入口，集中管理生產、文件與專案系統。">
+  <title>YU FENG 內部系統入口</title>
+  <link rel="icon" href="logo.png">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script type="module" src="assets/app.js"></script>
 </head>
 <body>
+  <a class="skip-link" href="#content">跳到主要內容</a>
 
-  <header>
-    <h1>
-      <img src="logo.png" alt="YU FENG" class="brand-logo">
-      <span class="brand-sub">技術部系統入口</span>
-    </h1>
+  <header class="app-header" role="banner">
+    <div class="header-inner">
+      <a class="brand" href="./" aria-label="YU FENG 內部系統入口首頁">
+        <img src="logo.png" alt="YU FENG" class="brand-logo">
+        <span class="brand-text">
+          <strong>內部系統入口</strong>
+          <span>Production Portal</span>
+        </span>
+      </a>
+
+      <div class="header-actions">
+        <button class="search-trigger" type="button" id="searchTrigger" aria-haspopup="dialog">
+          <span class="search-icon" aria-hidden="true"></span>
+          <span>搜尋系統</span>
+          <kbd>Ctrl K</kbd>
+        </button>
+        <div class="vpn-state" id="vpnState" data-state="checking" role="status" aria-live="polite">
+          <span class="state-dot" aria-hidden="true"></span>
+          <span id="vpnStateText">偵測 VPN</span>
+        </div>
+      </div>
+    </div>
   </header>
 
-  <main>
+  <div class="shell">
+    <aside class="sidebar" aria-label="入口分類">
+      <nav class="side-nav" aria-labelledby="navTitle">
+        <h2 id="navTitle">分類</h2>
+        <div id="categoryNav" class="nav-list"></div>
+      </nav>
+    </aside>
 
-    <div class="vpn-notice">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;margin-top:2px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      <span>標示「需公司 VPN」的系統，請先連接公司網路後再開啟。</span>
+    <main id="content" class="content" tabindex="-1">
+      <section class="intro" aria-labelledby="pageTitle">
+        <p class="eyebrow">YU FENG Portal</p>
+        <h1 id="pageTitle">系統入口</h1>
+        <p class="intro-copy">集中開啟生產監控、內部文件與專案紀錄；常用項目會依使用紀錄與釘選自動置頂。</p>
+      </section>
+
+      <section class="toolbar" aria-label="篩選工具">
+        <div class="filter-group" id="filterGroup" role="list"></div>
+        <button class="text-button" type="button" id="clearPrefs">清除個人化</button>
+      </section>
+
+      <div id="portalSections" class="portal-sections" aria-live="polite"></div>
+    </main>
+  </div>
+
+  <template id="sectionTemplate">
+    <section class="system-section" aria-labelledby="">
+      <div class="section-heading">
+        <h2></h2>
+        <span class="section-count"></span>
+      </div>
+      <div class="system-grid"></div>
+    </section>
+  </template>
+
+  <template id="systemCardTemplate">
+    <article class="system-card" data-card>
+      <a class="system-link" target="_blank" rel="noopener">
+        <span class="health-dot" aria-hidden="true"></span>
+        <span class="system-icon" aria-hidden="true"></span>
+        <span class="system-body">
+          <span class="system-title-row">
+            <strong class="system-title"></strong>
+            <span class="badges"></span>
+          </span>
+          <span class="system-desc"></span>
+          <span class="system-meta"></span>
+        </span>
+      </a>
+      <button class="pin-button" type="button" aria-pressed="false">
+        <span class="sr-only">釘選</span>
+      </button>
+    </article>
+  </template>
+
+  <div class="palette" id="palette" role="dialog" aria-modal="true" aria-labelledby="paletteTitle" hidden>
+    <div class="palette-panel">
+      <div class="palette-search">
+        <span class="search-icon" aria-hidden="true"></span>
+        <label class="sr-only" for="paletteInput" id="paletteTitle">搜尋系統</label>
+        <input id="paletteInput" type="search" autocomplete="off" placeholder="輸入系統、分類或關鍵字">
+        <kbd>Esc</kbd>
+      </div>
+      <div id="paletteResults" class="palette-results" role="listbox"></div>
     </div>
-
-    <!-- 生產監控系統 -->
-    <section class="category">
-      <h2 class="category-title">生產監控系統</h2>
-      <div class="grid">
-
-        <div class="card">
-          <div class="card-icon" aria-hidden="true">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
-          </div>
-          <div class="card-header">
-            <h3>MES System V2</h3>
-            <span class="badge badge-blue">需公司 VPN</span>
-          </div>
-          <p>機械手臂生產監控系統</p>
-          <a class="btn" href="http://100.82.186.54:8000" target="_blank" rel="noopener">開啟系統</a>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- 公司文檔 -->
-    <section class="category">
-      <h2 class="category-title">公司文檔</h2>
-      <div class="grid">
-
-        <div class="card">
-          <div class="card-icon" aria-hidden="true">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-          </div>
-          <div class="card-header">
-            <h3>公司文件庫</h3>
-            <span class="badge badge-blue">需公司 VPN</span>
-          </div>
-          <p>公司內部文件索引入口</p>
-          <a class="btn" href="http://100.82.186.54:8000/doc/文件導覽.html" target="_blank" rel="noopener">開啟文件導覽</a>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- 專案紀錄 -->
-    <section class="category">
-      <h2 class="category-title">專案紀錄</h2>
-      <div class="grid">
-
-        <div class="card">
-          <div class="card-icon" aria-hidden="true" style="color:#4ade80">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          </div>
-          <div class="card-header">
-            <h3>毅豐專案紀錄</h3>
-            <span class="badge badge-green">公開存取</span>
-          </div>
-          <p>專案進度追蹤與紀錄平台</p>
-          <a class="btn btn-green" href="https://ccyu025.github.io/ProjectRecords/" target="_blank" rel="noopener">開啟紀錄</a>
-        </div>
-
-      </div>
-    </section>
-
-  </main>
-
+  </div>
 </body>
 </html>

@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YU FENG 技術部系統入口 — 重構計畫書</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f172a;--bg-2:#0b1222;--surface:#1e293b;--surface-2:#334155;--surface-3:#475569;
+  --accent:#3b82f6;--accent-2:#60a5fa;--accent-dark:#2563eb;
+  --green:#22c55e;--amber:#fbbf24;--red:#ef4444;--purple:#a855f7;--cyan:#06b6d4;
+  --text:#f1f5f9;--muted:#94a3b8;--dim:#64748b;--border:#334155;--border-2:#1f2a3d;
+  --radius:14px;--radius-sm:8px;--radius-lg:20px;
+  --transition:.25s cubic-bezier(.4,0,.2,1);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.3);
+  --shadow:0 8px 24px rgba(0,0,0,.35);
+  --shadow-lg:0 20px 60px rgba(0,0,0,.5);
+  --gradient-accent:linear-gradient(135deg,#3b82f6 0%,#8b5cf6 100%);
+  --gradient-surface:linear-gradient(180deg,rgba(30,41,59,.8) 0%,rgba(15,23,42,.4) 100%);
+}
+html{color-scheme:dark;scroll-behavior:smooth;scroll-padding-top:24px}
+body{font-family:'Fira Sans','Noto Sans TC','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;line-height:1.6;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;background:
+  radial-gradient(900px 600px at 10% -10%,rgba(59,130,246,.15),transparent 60%),
+  radial-gradient(800px 500px at 100% 10%,rgba(168,85,247,.10),transparent 60%),
+  radial-gradient(600px 400px at 50% 100%,rgba(6,182,212,.08),transparent 60%);
+  pointer-events:none;z-index:-1}
+
+/* Layout */
+.app{display:grid;grid-template-columns:280px 1fr;min-height:100dvh}
+.sidebar{position:sticky;top:0;height:100dvh;border-right:1px solid var(--border);background:rgba(11,18,34,.7);backdrop-filter:blur(12px);padding:28px 22px;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.brand-mark{width:42px;height:42px;border-radius:10px;background:var(--gradient-accent);display:grid;place-items:center;font-weight:800;color:#fff;font-size:1rem;letter-spacing:.02em;box-shadow:0 4px 16px rgba(59,130,246,.4)}
+.brand-meta{display:flex;flex-direction:column;line-height:1.2}
+.brand-meta strong{font-size:.95rem;font-weight:700;letter-spacing:.02em}
+.brand-meta span{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-top:2px}
+.nav-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--dim);margin:18px 0 8px;padding-left:12px}
+nav.toc ul{list-style:none}
+nav.toc a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:.88rem;font-weight:500;transition:var(--transition);position:relative}
+nav.toc a::before{content:"";width:4px;height:4px;border-radius:50%;background:var(--dim);transition:var(--transition)}
+nav.toc a:hover{background:rgba(59,130,246,.08);color:var(--text)}
+nav.toc a:hover::before,nav.toc a.active::before{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+nav.toc a.active{background:rgba(59,130,246,.12);color:var(--accent-2)}
+.sidebar-footer{margin-top:30px;padding:14px;background:rgba(30,41,59,.5);border:1px solid var(--border);border-radius:10px;font-size:.72rem;color:var(--muted);line-height:1.5}
+.sidebar-footer strong{color:var(--text);display:block;margin-bottom:4px;font-size:.78rem}
+
+main{padding:48px 56px 80px;max-width:1180px}
+section{margin-bottom:88px;scroll-margin-top:24px}
+section:last-child{margin-bottom:40px}
+
+/* Hero */
+.hero{padding:56px 0 40px;border-bottom:1px solid var(--border);margin-bottom:56px;position:relative}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.15em;color:var(--accent-2);padding:6px 12px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);border-radius:999px;margin-bottom:20px}
+.eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+h1.hero-title{font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-.02em;line-height:1.15;margin-bottom:16px;background:linear-gradient(180deg,#f1f5f9 0%,#94a3b8 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-sub{font-size:1.1rem;color:var(--muted);max-width:720px;line-height:1.7}
+.hero-meta{display:flex;flex-wrap:wrap;gap:24px;margin-top:32px;padding-top:24px;border-top:1px dashed var(--border)}
+.hero-meta-item{display:flex;flex-direction:column;gap:2px}
+.hero-meta-item .k{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);font-weight:600}
+.hero-meta-item .v{font-size:.95rem;color:var(--text);font-weight:500}
+
+/* Section heading */
+.section-head{margin-bottom:36px}
+.section-num{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--accent);font-weight:500;letter-spacing:.1em;margin-bottom:8px;display:block}
+h2.section-title{font-size:1.85rem;font-weight:700;letter-spacing:-.01em;margin-bottom:10px}
+.section-desc{color:var(--muted);font-size:1rem;max-width:780px}
+
+/* Scorecard grid */
+.scorecards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-bottom:32px}
+.scorecard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;position:relative;overflow:hidden;transition:var(--transition);opacity:0;transform:translateY(20px);animation:fadeUp .6s forwards}
+.scorecard:nth-child(1){animation-delay:.05s}
+.scorecard:nth-child(2){animation-delay:.1s}
+.scorecard:nth-child(3){animation-delay:.15s}
+.scorecard:nth-child(4){animation-delay:.2s}
+.scorecard:nth-child(5){animation-delay:.25s}
+.scorecard:nth-child(6){animation-delay:.3s}
+.scorecard:nth-child(7){animation-delay:.35s}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+.scorecard:hover{transform:translateY(-3px);border-color:var(--surface-2);box-shadow:var(--shadow)}
+.scorecard::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--score-color,var(--accent))}
+.sc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
+.sc-title{font-size:.95rem;font-weight:600;line-height:1.3}
+.sc-title small{display:block;color:var(--muted);font-size:.72rem;font-weight:400;margin-top:2px;text-transform:uppercase;letter-spacing:.08em}
+.sc-score{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:700;color:var(--score-color,var(--accent));white-space:nowrap}
+.sc-score small{font-size:.8rem;color:var(--dim);font-weight:400}
+.sc-bar{height:6px;background:rgba(255,255,255,.05);border-radius:999px;overflow:hidden;margin-bottom:14px}
+.sc-bar-fill{height:100%;background:var(--score-color,var(--accent));border-radius:999px;width:0;transition:width 1.2s cubic-bezier(.4,0,.2,1);box-shadow:0 0 12px var(--score-color,var(--accent))}
+.sc-notes{font-size:.82rem;color:var(--muted);line-height:1.55}
+.sc-notes strong{color:var(--text);font-weight:500}
+
+/* Overall gauge */
+.overall{display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:center;padding:28px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:32px}
+.gauge{width:160px;height:160px;position:relative;flex-shrink:0}
+.gauge svg{transform:rotate(-90deg)}
+.gauge-track{fill:none;stroke:rgba(255,255,255,.06);stroke-width:12}
+.gauge-fill{fill:none;stroke:url(#gaugeGrad);stroke-width:12;stroke-linecap:round;stroke-dasharray:440;stroke-dashoffset:440;animation:gaugeFill 1.6s cubic-bezier(.4,0,.2,1) forwards .3s}
+@keyframes gaugeFill{to{stroke-dashoffset:154}}
+.gauge-text{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center}
+.gauge-text .num{font-family:'JetBrains Mono',monospace;font-size:2.2rem;font-weight:700;background:var(--gradient-accent);-webkit-background-clip:text;background-clip:text;color:transparent}
+.gauge-text .lbl{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.15em;margin-top:2px}
+.overall-meta h3{font-size:1.2rem;font-weight:600;margin-bottom:6px}
+.overall-meta p{color:var(--muted);font-size:.92rem;margin-bottom:14px}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:.72rem;padding:4px 10px;border-radius:999px;border:1px solid var(--border);color:var(--muted);background:rgba(255,255,255,.02)}
+.tag.warn{color:var(--amber);border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.08)}
+.tag.ok{color:var(--green);border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.08)}
+.tag.bad{color:var(--red);border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.08)}
+
+/* Findings list */
+.findings{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-top:20px}
+.finding{padding:18px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--finding-color,var(--accent));border-radius:var(--radius-sm)}
+.finding h4{font-size:.95rem;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.finding h4::before{content:attr(data-icon);font-size:1.1rem}
+.finding p{font-size:.85rem;color:var(--muted);line-height:1.6}
+.finding.critical{--finding-color:var(--red)}
+.finding.warn{--finding-color:var(--amber)}
+.finding.info{--finding-color:var(--accent)}
+.finding.good{--finding-color:var(--green)}
+
+/* Tabs */
+.tabs{margin:24px 0}
+.tab-bar{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:0;flex-wrap:wrap}
+.tab-btn{background:none;border:none;color:var(--muted);font-family:inherit;font-size:.88rem;font-weight:500;padding:12px 18px;cursor:pointer;border-bottom:2px solid transparent;transition:var(--transition);margin-bottom:-1px}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--accent-2);border-bottom-color:var(--accent)}
+.tab-btn .count{display:inline-block;margin-left:6px;padding:1px 7px;background:rgba(59,130,246,.15);color:var(--accent-2);font-size:.7rem;border-radius:999px;font-weight:600}
+.tab-panels{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:24px}
+.tab-panel{display:none}
+.tab-panel.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* Code blocks */
+.code-compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:900px){.code-compare{grid-template-columns:1fr}}
+.code-block{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+.code-head{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.code-head .label-before{color:var(--amber)}
+.code-head .label-after{color:var(--green)}
+.code-head .lang{font-family:'JetBrains Mono',monospace;color:var(--dim);font-weight:400;text-transform:none;letter-spacing:0}
+pre{padding:16px;overflow-x:auto;font-family:'JetBrains Mono','Consolas',monospace;font-size:.78rem;line-height:1.65;color:#cbd5e1}
+.tok-tag{color:#f87171}.tok-attr{color:#fbbf24}.tok-str{color:#86efac}.tok-com{color:#64748b;font-style:italic}.tok-key{color:#c4b5fd}.tok-num{color:#67e8f9}.tok-sel{color:#fbbf24}.tok-prop{color:#93c5fd}.tok-val{color:#86efac}
+
+/* Accordion */
+.accordion{margin-top:20px}
+details.acc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;transition:var(--transition)}
+details.acc[open]{border-color:var(--surface-2);box-shadow:var(--shadow-sm)}
+details.acc summary{padding:18px 22px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:.95rem;list-style:none;transition:var(--transition)}
+details.acc summary::-webkit-details-marker{display:none}
+details.acc summary:hover{background:rgba(255,255,255,.02)}
+.acc-icon{width:24px;height:24px;border-radius:6px;background:rgba(59,130,246,.12);color:var(--accent-2);display:grid;place-items:center;font-size:.85rem;font-weight:700;transition:var(--transition)}
+details.acc[open] .acc-icon{transform:rotate(45deg);background:var(--accent);color:#fff}
+.acc-body{padding:4px 22px 22px;color:var(--muted);font-size:.9rem;line-height:1.7}
+.acc-body p+p{margin-top:10px}
+.acc-body ul{margin:10px 0 0 18px}
+.acc-body li{margin-bottom:4px}
+
+/* Design preview mock */
+.mock-wrap{margin-top:24px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+.mock-bar{display:flex;align-items:center;gap:8px;padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--border)}
+.mock-dot{width:11px;height:11px;border-radius:50%}
+.mock-dot.r{background:#ef4444}.mock-dot.y{background:#fbbf24}.mock-dot.g{background:#22c55e}
+.mock-url{flex:1;background:var(--surface);border-radius:6px;padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);margin-left:12px}
+.mock-portal{background:linear-gradient(180deg,#0f172a 0%,#0b1222 100%);border-radius:10px;padding:24px;min-height:420px;position:relative;overflow:hidden}
+.mock-portal::before{content:"";position:absolute;top:-100px;right:-100px;width:300px;height:300px;background:radial-gradient(circle,rgba(59,130,246,.15),transparent 70%);border-radius:50%}
+.mp-header{display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:20px;position:relative}
+.mp-brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:.9rem}
+.mp-brand .logo{width:30px;height:30px;border-radius:7px;background:var(--gradient-accent);display:grid;place-items:center;color:#fff;font-size:.7rem;font-weight:800}
+.mp-search{flex:1;max-width:340px;margin:0 20px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:8px}
+.mp-search::before{content:"⌕";color:var(--accent-2);font-size:1rem}
+.mp-search small{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.65rem;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:4px;color:var(--dim)}
+.mp-user{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--muted)}
+.mp-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#a855f7,#3b82f6);display:grid;place-items:center;color:#fff;font-size:.7rem;font-weight:700}
+.mp-quick{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap}
+.mp-chip{font-size:.7rem;padding:5px 12px;border-radius:999px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:var(--accent-2);cursor:pointer}
+.mp-chip.act{background:var(--accent);color:#fff;border-color:var(--accent)}
+.mp-section-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:18px 0 10px;display:flex;align-items:center;gap:8px}
+.mp-section-title::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
+.mp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mp-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;position:relative;transition:var(--transition);cursor:pointer}
+.mp-card:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 8px 20px rgba(59,130,246,.15)}
+.mp-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.mp-icon{width:34px;height:34px;border-radius:8px;background:rgba(59,130,246,.12);color:var(--accent-2);display:grid;place-items:center;font-size:1.05rem}
+.mp-icon.gn{background:rgba(34,197,94,.12);color:#86efac}
+.mp-icon.pu{background:rgba(168,85,247,.12);color:#c4b5fd}
+.mp-status{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+.mp-status.off{background:var(--dim);box-shadow:none}
+.mp-card h4{font-size:.78rem;font-weight:600;margin-bottom:3px}
+.mp-card p{font-size:.66rem;color:var(--muted);line-height:1.4}
+.mp-card .mp-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--border-2);font-size:.62rem;color:var(--dim)}
+.mp-card .vpn{color:var(--amber)}
+
+/* Transformation list */
+.transforms{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:24px}
+.transform{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;position:relative}
+.transform .badge{display:inline-block;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:3px 8px;border-radius:4px;margin-bottom:10px}
+.transform .badge.keep{background:rgba(34,197,94,.15);color:#86efac}
+.transform .badge.evolve{background:rgba(59,130,246,.15);color:#93c5fd}
+.transform .badge.new{background:rgba(168,85,247,.15);color:#c4b5fd}
+.transform h4{font-size:.95rem;font-weight:600;margin-bottom:6px}
+.transform p{font-size:.82rem;color:var(--muted);line-height:1.55}
+
+/* Timeline */
+.timeline{position:relative;margin-top:32px;padding-left:32px}
+.timeline::before{content:"";position:absolute;left:8px;top:8px;bottom:8px;width:2px;background:linear-gradient(180deg,var(--accent),var(--purple) 50%,var(--cyan))}
+.phase{position:relative;margin-bottom:28px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;transition:var(--transition)}
+.phase:hover{transform:translateX(4px);border-color:var(--surface-2)}
+.phase::before{content:"";position:absolute;left:-32px;top:28px;width:18px;height:18px;border-radius:50%;background:var(--bg);border:3px solid var(--phase-color,var(--accent));box-shadow:0 0 0 4px var(--bg),0 0 16px var(--phase-color,var(--accent))}
+.phase[data-phase="1"]{--phase-color:var(--accent)}
+.phase[data-phase="2"]{--phase-color:var(--purple)}
+.phase[data-phase="3"]{--phase-color:var(--cyan)}
+.phase-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+.phase-num{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--phase-color);font-weight:600;letter-spacing:.12em}
+.phase h3{font-size:1.15rem;font-weight:700;margin-top:2px}
+.phase-time{font-size:.78rem;color:var(--muted);padding:4px 10px;background:rgba(255,255,255,.04);border-radius:6px;border:1px solid var(--border)}
+.phase-goal{font-size:.88rem;color:var(--muted);margin-bottom:14px;padding-bottom:14px;border-bottom:1px dashed var(--border)}
+.phase-tasks{display:grid;gap:8px}
+.task{display:flex;align-items:flex-start;gap:10px;font-size:.85rem;color:var(--text)}
+.task-check{flex-shrink:0;width:18px;height:18px;border-radius:5px;border:1px solid var(--phase-color);display:grid;place-items:center;margin-top:1px;color:var(--phase-color);font-size:.7rem;font-weight:700}
+.task-text{color:var(--muted)}
+.task-text strong{color:var(--text);font-weight:500;margin-right:4px}
+
+/* Closing */
+.closing{margin-top:60px;padding:36px;background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(168,85,247,.08));border:1px solid var(--border);border-radius:var(--radius-lg);text-align:center;position:relative;overflow:hidden}
+.closing::before{content:"";position:absolute;inset:0;background:radial-gradient(600px circle at 50% 0%,rgba(59,130,246,.15),transparent 60%);pointer-events:none}
+.closing h3{font-size:1.5rem;font-weight:700;margin-bottom:10px;position:relative}
+.closing p{color:var(--muted);max-width:600px;margin:0 auto 20px;position:relative}
+.closing .sig{display:inline-flex;align-items:center;gap:10px;padding:10px 18px;background:var(--surface);border:1px solid var(--border);border-radius:999px;font-size:.85rem;color:var(--muted);position:relative}
+.closing .sig strong{color:var(--accent-2);font-weight:600}
+
+/* Mobile nav */
+.menu-btn{display:none;position:fixed;top:16px;right:16px;z-index:50;width:44px;height:44px;border-radius:10px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:1.3rem;cursor:pointer;align-items:center;justify-content:center}
+
+/* Responsive */
+@media(max-width:1024px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:fixed;left:-100%;width:280px;z-index:40;transition:left .3s ease}
+  .sidebar.open{left:0;box-shadow:var(--shadow-lg)}
+  .menu-btn{display:inline-flex}
+  main{padding:32px 24px 60px}
+}
+@media(max-width:640px){
+  main{padding:24px 18px 48px}
+  section{margin-bottom:60px}
+  .overall{grid-template-columns:1fr;text-align:center}
+  .gauge{margin:0 auto}
+  .mp-grid{grid-template-columns:1fr 1fr}
+  .hero{padding:32px 0 28px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important}
+  .sc-bar-fill{width:var(--w,80%) !important}
+}
+
+/* Print */
+@media print{
+  body{background:#fff;color:#000}
+  .sidebar,.menu-btn{display:none}
+  .app{display:block}
+  main{padding:24px;max-width:none}
+  .scorecard,.finding,.phase,.transform,.mock-wrap{break-inside:avoid;border-color:#ccc;background:#fff;color:#000}
+  section{margin-bottom:40px;page-break-inside:avoid}
+  .sc-bar-fill{background:#333 !important;box-shadow:none !important}
+}
+</style>
+</head>
+<body>
+
+<button class="menu-btn" id="menuBtn" aria-label="開啟導覽">☰</button>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">YF</div>
+      <div class="brand-meta">
+        <strong>重構計畫書</strong>
+        <span>v2.0 Proposal</span>
+      </div>
+    </div>
+    <div class="nav-label">章節導覽</div>
+    <nav class="toc">
+      <ul>
+        <li><a href="#exec">執行摘要</a></li>
+        <li><a href="#evaluation">資深顧問評估</a></li>
+        <li><a href="#findings">關鍵發現</a></li>
+        <li><a href="#refactor">重構建議</a></li>
+        <li><a href="#design">新版設計提案</a></li>
+        <li><a href="#preview">視覺預覽</a></li>
+        <li><a href="#roadmap">實施路線圖</a></li>
+        <li><a href="#closing">結語</a></li>
+      </ul>
+    </nav>
+    <div class="sidebar-footer">
+      <strong>YU FENG 技術部</strong>
+      文件編號 PORTAL-PROP-2026-01<br>
+      2026 / 05 / 28 &nbsp;·&nbsp; 機密
+    </div>
+  </aside>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero" id="exec">
+      <span class="eyebrow">PROPOSAL · 技術部系統入口 · v2.0</span>
+      <h1 class="hero-title">從「連結清單」到<br>「工程師工作台」</h1>
+      <p class="hero-sub">本計畫書針對 YU FENG 技術部系統入口（index.html）進行完整 UX/IA 評估，並提出可在純靜態 GitHub Pages 環境落地的重構藍圖。目標是把現有的入口頁，升級為支援搜尋、狀態感知、可擴充至數十個系統的內部工作台。</p>
+      <div class="hero-meta">
+        <div class="hero-meta-item"><span class="k">客戶</span><span class="v">YU FENG 毅豐 · 技術部</span></div>
+        <div class="hero-meta-item"><span class="k">範圍</span><span class="v">入口頁面 UI / IA / UX 重構</span></div>
+        <div class="hero-meta-item"><span class="k">技術限制</span><span class="v">純靜態 HTML · 無建置工具</span></div>
+        <div class="hero-meta-item"><span class="k">交付週期</span><span class="v">3 階段 · 約 6 週</span></div>
+        <div class="hero-meta-item"><span class="k">顧問</span><span class="v">Senior Frontend Consultant</span></div>
+      </div>
+    </section>
+
+    <!-- EVALUATION -->
+    <section id="evaluation">
+      <div class="section-head">
+        <span class="section-num">01 / EVALUATION</span>
+        <h2 class="section-title">資深顧問評估</h2>
+        <p class="section-desc">採用 0–100 分制，從七個維度檢視現行入口頁。每項分數附帶觀察重點與證據。</p>
+      </div>
+
+      <div class="overall">
+        <div class="gauge">
+          <svg width="160" height="160" viewBox="0 0 160 160">
+            <defs>
+              <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#3b82f6"/>
+                <stop offset="100%" stop-color="#a855f7"/>
+              </linearGradient>
+            </defs>
+            <circle class="gauge-track" cx="80" cy="80" r="70"/>
+            <circle class="gauge-fill" cx="80" cy="80" r="70"/>
+          </svg>
+          <div class="gauge-text">
+            <div class="num">65</div>
+            <div class="lbl">綜合評分</div>
+          </div>
+        </div>
+        <div class="overall-meta">
+          <h3>「合格基線，但離卓越尚遠」</h3>
+          <p>現行版本具備清楚的視覺基礎與深色主題語言，但缺乏搜尋、狀態指示、可擴充的資料層，且資訊架構在系統數量成長後將迅速崩壞。</p>
+          <div class="tag-row">
+            <span class="tag ok">✓ 深色主題一致</span>
+            <span class="tag ok">✓ 響應式網格</span>
+            <span class="tag warn">⚠ 缺乏搜尋</span>
+            <span class="tag warn">⚠ 硬編碼資料</span>
+            <span class="tag bad">✕ 無狀態指示</span>
+            <span class="tag bad">✕ 圖示為 inline SVG 重複</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="scorecards">
+        <div class="scorecard" style="--score-color:#3b82f6">
+          <div class="sc-head">
+            <div class="sc-title">視覺設計 &amp; 資訊層次<small>Visual &amp; Hierarchy</small></div>
+            <div class="sc-score">72<small>/100</small></div>
+          </div>
+          <div class="sc-bar"><div class="sc-bar-fill" style="--w:72%"></div></div>
+          <div class="sc-notes"><strong>優點：</strong>色票統一、卡片留白合宜。<strong>問題：</strong>缺少標題層級對比；分類標題與卡片標題的視覺重量過於接近，眼睛無錨點。</div>
+        </div>
+        <div class="scorecard" style="--score-color:#fbbf24">
+          <div class="sc-head">
+            <div class="sc-title">資訊架構<small>Information Architecture</small></div>
+            <div class="sc-score">58<small>/100</small></div>
+          </div>
+          <div class="sc-bar"><div class="sc-bar-fill" style="--w:58%"></div></div>
+          <div class="sc-notes"><strong>問題：</strong>三個分類僅四張卡片就硬編碼於 HTML，無法擴充。未來新增系統需手動複製 DOM，且無法搜尋、無法以使用頻率排序。</div>
+        </div>
+        <div class="scorecard" style="--score-color:#ef4444">
+          <div class="sc-head">
+            <div class="sc-title">使用者體驗<small>UX &amp; Usability</small></div>
+            <div class="sc-score">52<small>/100</small></div>
+          </div>
+          <div class="sc-bar"><div class="sc-bar-fill" style="--w:52%"></div></div>
+          <div class="sc-notes"><strong>致命傷：</strong>使用者無法得知系統是否在線、無常用清單、無鍵盤快速開啟、無 VPN 連線狀態自動偵測。每次都要從頭視覺掃描。</div>
+        </div>
+        <div class="scorecard" style="--score-color:#fbbf24">
+          <div class="sc-head">
+            <div class="sc-title">無障礙<small>Accessibility</small></div>
+            <div class="sc-score">68<small>/100</small></div>
+          </div>
+          <div class="sc-bar"><div class="sc-bar-fill" style="--w:68%"></div></div>
+          <div class="sc-notes"><strong>優點：</strong>有 focus-visible、reduced-motion 支援。<strong>問題：</strong>整張卡只有按鈕可點，卡片本體未成為連結；缺乏 landmark、aria-label，screen reader 體驗薄弱。</div>
+        </div>
+        <div class="scorecard" style="--score-color:#22c55e">
+          <div class="sc-head">
+            <div class="sc-title">效能<small>Performance</small></div>
+            <div class="sc-score">88<small>/100</small></div>
+          </div>
+          <div class="sc-bar"><div class="sc-bar-fill" style="--w:88%"></div></div>
+          <div class="sc-notes"><strong>優點：</strong>單檔靜態、CSS inline、零 JS、字型 preconnect。<strong>可優化：</strong>Google Fonts 阻塞渲染，可改 font-display:swap 並自託管 woff2。</div>
+        </div>
+        <div class="scorecard" style="--score-color:#ef4444">
+          <div class="sc-head">
+            <div class="sc-title">可擴充性<small>Scalability</small></div>
+            <div class="sc-score">45<small>/100</small></div>
+          </div>
+          <div class="sc-bar"><div class="sc-bar-fill" style="--w:45%"></div></div>
+          <div class="sc-notes"><strong>核心痛點：</strong>系統清單寫死在 HTML。當技術部要新增第 10、第 20 個系統時，無人能維護。需資料層（JSON）+ 範本渲染。</div>
+        </div>
+        <div class="scorecard" style="--score-color:#fbbf24">
+          <div class="sc-head">
+            <div class="sc-title">行動裝置體驗<small>Mobile Experience</small></div>
+            <div class="sc-score">70<small>/100</small></div>
+          </div>
+          <div class="sc-bar"><div class="sc-bar-fill" style="--w:70%"></div></div>
+          <div class="sc-notes"><strong>優點：</strong>多斷點響應。<strong>問題：</strong>內網 IP 連結在手機 4G 上會「失敗但無提示」；觸控區雖 ≥44px 但卡片整體未可點。</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINDINGS -->
+    <section id="findings">
+      <div class="section-head">
+        <span class="section-num">02 / FINDINGS</span>
+        <h2 class="section-title">關鍵發現</h2>
+        <p class="section-desc">從上述七維分析萃取出的可行動清單。標示為 Critical 的項目，建議在 Phase 1 即處理。</p>
+      </div>
+
+      <div class="findings">
+        <div class="finding critical">
+          <h4 data-icon="🔴">資料與視圖耦合</h4>
+          <p>系統清單寫死在 HTML，新增一個系統等於改一塊 DOM。應抽離為 JSON 資料，由模板動態渲染。</p>
+        </div>
+        <div class="finding critical">
+          <h4 data-icon="🔴">無搜尋 / 無快捷鍵</h4>
+          <p>當系統超過 10 個，眼掃就崩潰。需提供 ⌘K / Ctrl+K 全域搜尋 + 模糊比對。</p>
+        </div>
+        <div class="finding critical">
+          <h4 data-icon="🔴">無連線健康狀態</h4>
+          <p>VPN 內網系統無法得知是否可達。應以 fetch + AbortController 做被動探測，前置綠/灰點。</p>
+        </div>
+        <div class="finding warn">
+          <h4 data-icon="🟡">缺乏個人化</h4>
+          <p>無「最近使用 / 釘選」概念，每位工程師看到的是同一張無記憶頁面。應用 localStorage 紀錄使用頻率。</p>
+        </div>
+        <div class="finding warn">
+          <h4 data-icon="🟡">圖示佔位、不一致</h4>
+          <p>目前卡片 SVG 各自獨立撰寫，難以統一維護。應導入單一 icon set（Lucide inline SVG）保持風格一致。</p>
+        </div>
+        <div class="finding info">
+          <h4 data-icon="🔵">缺少 Landmark</h4>
+          <p>無 &lt;nav&gt;、&lt;aside&gt;、&lt;footer&gt;，screen reader 無法跳區。修正為標準 HTML5 sectioning。</p>
+        </div>
+        <div class="finding info">
+          <h4 data-icon="🔵">VPN 提示靜態</h4>
+          <p>黃色提醒永遠顯示。可在偵測到能連線時自動轉為「已連線 ✓」綠色狀態。</p>
+        </div>
+        <div class="finding good">
+          <h4 data-icon="🟢">主題系統紮實</h4>
+          <p>CSS 變數已抽離得宜，重構成本低。新版可直接繼承 --bg / --accent / --surface。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- REFACTOR -->
+    <section id="refactor">
+      <div class="section-head">
+        <span class="section-num">03 / REFACTOR</span>
+        <h2 class="section-title">重構建議（Before / After）</h2>
+        <p class="section-desc">以下四個 Tab 涵蓋最關鍵的程式碼層級改動。所有改動皆相容單檔靜態部署。</p>
+      </div>
+
+      <div class="tabs" id="refTabs">
+        <div class="tab-bar" role="tablist">
+          <button class="tab-btn active" data-tab="t1" role="tab">資料層抽離 <span class="count">1</span></button>
+          <button class="tab-btn" data-tab="t2" role="tab">語意化結構 <span class="count">2</span></button>
+          <button class="tab-btn" data-tab="t3" role="tab">⌘K 搜尋 <span class="count">3</span></button>
+          <button class="tab-btn" data-tab="t4" role="tab">健康狀態 <span class="count">4</span></button>
+        </div>
+        <div class="tab-panels">
+
+          <div class="tab-panel active" id="t1">
+            <h4 style="font-size:1rem;margin-bottom:8px">將系統清單抽離為資料</h4>
+            <p style="color:var(--muted);font-size:.88rem">把 DOM 換成可被 vanilla JS 渲染的 JSON 陣列，新增系統只需編輯一個物件。</p>
+            <div class="code-compare">
+              <div class="code-block">
+                <div class="code-head"><span class="label-before">BEFORE</span><span class="lang">index.html</span></div>
+<pre><span class="tok-tag">&lt;div</span> <span class="tok-attr">class</span>=<span class="tok-str">"card"</span><span class="tok-tag">&gt;</span>
+  <span class="tok-tag">&lt;div</span> <span class="tok-attr">class</span>=<span class="tok-str">"card-header"</span><span class="tok-tag">&gt;</span>
+    <span class="tok-tag">&lt;h3&gt;</span>MES System V2<span class="tok-tag">&lt;/h3&gt;</span>
+    <span class="tok-tag">&lt;span</span> <span class="tok-attr">class</span>=<span class="tok-str">"badge badge-blue"</span><span class="tok-tag">&gt;</span>需 VPN<span class="tok-tag">&lt;/span&gt;</span>
+  <span class="tok-tag">&lt;/div&gt;</span>
+  <span class="tok-tag">&lt;p&gt;</span>機械手臂生產監控<span class="tok-tag">&lt;/p&gt;</span>
+  <span class="tok-tag">&lt;a</span> <span class="tok-attr">href</span>=<span class="tok-str">"http://100..."</span><span class="tok-tag">&gt;</span>開啟<span class="tok-tag">&lt;/a&gt;</span>
+<span class="tok-tag">&lt;/div&gt;</span>
+<span class="tok-com">/* 每個系統重複 ~10 行 */</span></pre>
+              </div>
+              <div class="code-block">
+                <div class="code-head"><span class="label-after">AFTER</span><span class="lang">data.js (inline)</span></div>
+<pre><span class="tok-key">const</span> SYSTEMS = [
+  {
+    <span class="tok-prop">id</span>: <span class="tok-str">'mes-v2'</span>,
+    <span class="tok-prop">name</span>: <span class="tok-str">'MES System V2'</span>,
+    <span class="tok-prop">desc</span>: <span class="tok-str">'機械手臂生產監控系統'</span>,
+    <span class="tok-prop">url</span>: <span class="tok-str">'http://100.82.186.54:8000'</span>,
+    <span class="tok-prop">category</span>: <span class="tok-str">'production'</span>,
+    <span class="tok-prop">icon</span>: <span class="tok-str">'cpu'</span>,
+    <span class="tok-prop">vpn</span>: <span class="tok-num">true</span>,
+    <span class="tok-prop">healthCheck</span>: <span class="tok-num">true</span>
+  },
+  <span class="tok-com">// 新增系統只要一個物件</span>
+];</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="t2">
+            <h4 style="font-size:1rem;margin-bottom:8px">語意化結構與整卡可點</h4>
+            <p style="color:var(--muted);font-size:.88rem">把 div.card 改為 a.card，整張卡片皆為連結；補上 landmarks。</p>
+            <div class="code-compare">
+              <div class="code-block">
+                <div class="code-head"><span class="label-before">BEFORE</span><span class="lang">html</span></div>
+<pre><span class="tok-tag">&lt;header&gt;</span>...<span class="tok-tag">&lt;/header&gt;</span>
+<span class="tok-tag">&lt;main&gt;</span>
+  <span class="tok-tag">&lt;section</span> <span class="tok-attr">class</span>=<span class="tok-str">"category"</span><span class="tok-tag">&gt;</span>
+    <span class="tok-tag">&lt;div</span> <span class="tok-attr">class</span>=<span class="tok-str">"card"</span><span class="tok-tag">&gt;</span>
+      <span class="tok-com">&lt;!-- 點擊區只有按鈕 --&gt;</span>
+      <span class="tok-tag">&lt;a</span> <span class="tok-attr">class</span>=<span class="tok-str">"btn"</span><span class="tok-tag">&gt;</span>開啟<span class="tok-tag">&lt;/a&gt;</span>
+    <span class="tok-tag">&lt;/div&gt;</span>
+  <span class="tok-tag">&lt;/section&gt;</span>
+<span class="tok-tag">&lt;/main&gt;</span></pre>
+              </div>
+              <div class="code-block">
+                <div class="code-head"><span class="label-after">AFTER</span><span class="lang">html</span></div>
+<pre><span class="tok-tag">&lt;header</span> <span class="tok-attr">role</span>=<span class="tok-str">"banner"</span><span class="tok-tag">&gt;</span>...<span class="tok-tag">&lt;/header&gt;</span>
+<span class="tok-tag">&lt;nav</span> <span class="tok-attr">aria-label</span>=<span class="tok-str">"分類"</span><span class="tok-tag">&gt;</span>...<span class="tok-tag">&lt;/nav&gt;</span>
+<span class="tok-tag">&lt;main</span> <span class="tok-attr">id</span>=<span class="tok-str">"content"</span><span class="tok-tag">&gt;</span>
+  <span class="tok-tag">&lt;section</span> <span class="tok-attr">aria-labelledby</span>=<span class="tok-str">"cat-prod"</span><span class="tok-tag">&gt;</span>
+    <span class="tok-tag">&lt;a</span> <span class="tok-attr">class</span>=<span class="tok-str">"card"</span>
+       <span class="tok-attr">href</span>=<span class="tok-str">"..."</span>
+       <span class="tok-attr">aria-label</span>=<span class="tok-str">"MES V2 (需 VPN)"</span><span class="tok-tag">&gt;</span>
+      <span class="tok-com">&lt;!-- 整張卡片可點 + 鍵盤可達 --&gt;</span>
+    <span class="tok-tag">&lt;/a&gt;</span>
+  <span class="tok-tag">&lt;/section&gt;</span>
+<span class="tok-tag">&lt;/main&gt;</span></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="t3">
+            <h4 style="font-size:1rem;margin-bottom:8px">⌘K 全域搜尋（純 vanilla JS）</h4>
+            <p style="color:var(--muted);font-size:.88rem">按 Ctrl/⌘+K 開啟搜尋面板，輸入即時模糊比對名稱、描述、分類。</p>
+            <div class="code-compare">
+              <div class="code-block">
+                <div class="code-head"><span class="label-before">BEFORE</span><span class="lang">—</span></div>
+<pre><span class="tok-com">// 不存在
+// 使用者只能用 Ctrl+F 瀏覽器原生搜尋
+// 但找到後仍需手動點擊按鈕</span></pre>
+              </div>
+              <div class="code-block">
+                <div class="code-head"><span class="label-after">AFTER</span><span class="lang">script (inline)</span></div>
+<pre><span class="tok-key">document</span>.addEventListener(<span class="tok-str">'keydown'</span>, e =&gt; {
+  <span class="tok-key">if</span> ((e.metaKey||e.ctrlKey) &amp;&amp; e.key===<span class="tok-str">'k'</span>) {
+    e.preventDefault();
+    openPalette();
+  }
+});
+
+<span class="tok-key">function</span> filter(q) {
+  <span class="tok-key">return</span> SYSTEMS.filter(s =&gt;
+    [s.name,s.desc,s.category]
+      .join(<span class="tok-str">' '</span>).toLowerCase()
+      .includes(q.toLowerCase())
+  );
+}</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="t4">
+            <h4 style="font-size:1rem;margin-bottom:8px">被動健康檢查</h4>
+            <p style="color:var(--muted);font-size:.88rem">用 fetch 配合 timeout，在卡片左上角顯示綠/灰圓點，VPN 提示自動變綠。</p>
+            <div class="code-compare">
+              <div class="code-block">
+                <div class="code-head"><span class="label-before">BEFORE</span><span class="lang">—</span></div>
+<pre><span class="tok-com">// 永遠顯示「需公司 VPN」黃色橫幅
+// 即使已連線也不會消失
+// 使用者點下去才知道能不能用</span></pre>
+              </div>
+              <div class="code-block">
+                <div class="code-head"><span class="label-after">AFTER</span><span class="lang">script</span></div>
+<pre><span class="tok-key">async function</span> ping(url) {
+  <span class="tok-key">const</span> ctrl = <span class="tok-key">new</span> AbortController();
+  <span class="tok-key">const</span> t = setTimeout(()=&gt;ctrl.abort(), <span class="tok-num">2000</span>);
+  <span class="tok-key">try</span> {
+    <span class="tok-key">await</span> fetch(url, {
+      <span class="tok-prop">mode</span>:<span class="tok-str">'no-cors'</span>,
+      <span class="tok-prop">signal</span>:ctrl.signal
+    });
+    <span class="tok-key">return</span> <span class="tok-str">'online'</span>;
+  } <span class="tok-key">catch</span> { <span class="tok-key">return</span> <span class="tok-str">'offline'</span>; }
+  <span class="tok-key">finally</span> { clearTimeout(t); }
+}</pre>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="accordion">
+        <details class="acc" open>
+          <summary>其他建議改動（展開）<span class="acc-icon">+</span></summary>
+          <div class="acc-body">
+            <ul>
+              <li><strong>字型自託管：</strong>把 Fira Sans 與 Noto Sans TC 的 woff2 檔放入 repo /fonts/，移除 Google Fonts 三個外部請求。</li>
+              <li><strong>釘選機制：</strong>右上角 ☆ 圖示，存 localStorage，置頂顯示「我的常用」分區。</li>
+              <li><strong>404 / 離線頁：</strong>提供 offline.html 供 GitHub Pages 部署為 SPA fallback。</li>
+              <li><strong>i18n 結構：</strong>把所有文案抽到 I18N.zhHant 物件，預留 en / zhHans 鍵位。</li>
+            </ul>
+          </div>
+        </details>
+        <details class="acc">
+          <summary>不建議做的事（反模式）<span class="acc-icon">+</span></summary>
+          <div class="acc-body">
+            <p>為了保住「純靜態、無建置」的核心優勢，<strong>不建議</strong>引入：</p>
+            <ul>
+              <li>React / Vue / Svelte — 違背無建置原則。</li>
+              <li>Tailwind CLI — 需要 build step。</li>
+              <li>Service Worker 全離線 — 對內部入口而言，維護成本 &gt; 效益。</li>
+              <li>Auth 機制 — 應由 VPN/Tailscale 層處理，非前端職責。</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- DESIGN -->
+    <section id="design">
+      <div class="section-head">
+        <span class="section-num">04 / DESIGN</span>
+        <h2 class="section-title">新版設計提案</h2>
+        <p class="section-desc">維持深色語言與 #3b82f6 主色，但在版面上引入「工作台」隱喻：頂部搜尋、快速分類、狀態指示、可釘選。</p>
+      </div>
+
+      <div class="transforms">
+        <div class="transform">
+          <span class="badge keep">KEEP 保留</span>
+          <h4>深色主題與色票</h4>
+          <p>#0f172a / #1e293b / #3b82f6 完整繼承，僅微調 surface 對比；補上 #a855f7 作為次要強調色用於 hero。</p>
+        </div>
+        <div class="transform">
+          <span class="badge keep">KEEP 保留</span>
+          <h4>分類分區概念</h4>
+          <p>「生產監控 / 公司文檔 / 專案紀錄」結構保留，但改為可摺疊、可重新排序的 section。</p>
+        </div>
+        <div class="transform">
+          <span class="badge keep">KEEP 保留</span>
+          <h4>Fira Sans 字型</h4>
+          <p>數字辨識度佳，續用為主字型；補上 Noto Sans TC 強化中文渲染。</p>
+        </div>
+        <div class="transform">
+          <span class="badge evolve">EVOLVE 演進</span>
+          <h4>卡片 → 工作台卡片</h4>
+          <p>每張卡新增：左上狀態點、右上釘選星、底部最近開啟時間。Hover 加入發光邊框與微浮升。</p>
+        </div>
+        <div class="transform">
+          <span class="badge evolve">EVOLVE 演進</span>
+          <h4>VPN 提示 → 連線狀態列</h4>
+          <p>從永遠黃色變為動態：未偵測（灰）/ 已連線（綠 ✓）/ 連線失敗（橘 ⚠）。</p>
+        </div>
+        <div class="transform">
+          <span class="badge evolve">EVOLVE 演進</span>
+          <h4>Header → App Bar</h4>
+          <p>Logo + 搜尋框 + 使用者頭像三段式，符合 Linear / Notion 的內部工具語言。</p>
+        </div>
+        <div class="transform">
+          <span class="badge new">NEW 新增</span>
+          <h4>⌘K 命令面板</h4>
+          <p>全域快捷鍵開啟搜尋；輸入即時過濾、Enter 開啟、Shift+Enter 在新分頁。</p>
+        </div>
+        <div class="transform">
+          <span class="badge new">NEW 新增</span>
+          <h4>「我的常用」分區</h4>
+          <p>依 localStorage 紀錄的開啟次數，自動置頂前 4 個系統；可手動釘選覆蓋。</p>
+        </div>
+        <div class="transform">
+          <span class="badge new">NEW 新增</span>
+          <h4>快速篩選 Chips</h4>
+          <p>頂部「全部 / 生產 / 文檔 / 專案 / 公開存取」可單擊切換，無需 reload。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PREVIEW -->
+    <section id="preview">
+      <div class="section-head">
+        <span class="section-num">05 / PREVIEW</span>
+        <h2 class="section-title">視覺預覽 Mockup</h2>
+        <p class="section-desc">以下為新版入口頁的高保真示意，所有元素皆為 HTML/CSS 渲染、可即時調整。</p>
+      </div>
+
+      <div class="mock-wrap">
+        <div class="mock-bar">
+          <span class="mock-dot r"></span>
+          <span class="mock-dot y"></span>
+          <span class="mock-dot g"></span>
+          <span class="mock-url">https://ccyu025.github.io/portal/</span>
+        </div>
+        <div class="mock-portal">
+          <div class="mp-header">
+            <div class="mp-brand">
+              <div class="logo">YF</div>
+              <div>YU FENG <span style="color:var(--muted);font-weight:400">· 技術部</span></div>
+            </div>
+            <div class="mp-search">搜尋系統、文件、專案... <small>⌘K</small></div>
+            <div class="mp-user">
+              <span style="color:var(--green);font-size:.7rem">● 已連線 VPN</span>
+              <div class="mp-avatar">湯</div>
+            </div>
+          </div>
+
+          <div class="mp-quick">
+            <span class="mp-chip act">全部</span>
+            <span class="mp-chip">⭐ 我的常用</span>
+            <span class="mp-chip">生產監控</span>
+            <span class="mp-chip">公司文檔</span>
+            <span class="mp-chip">專案紀錄</span>
+            <span class="mp-chip">公開存取</span>
+          </div>
+
+          <div class="mp-section-title">⭐ 我的常用</div>
+          <div class="mp-grid">
+            <div class="mp-card">
+              <div class="mp-card-top"><div class="mp-icon">🦾</div><div class="mp-status"></div></div>
+              <h4>MES System V2</h4>
+              <p>機械手臂生產監控</p>
+              <div class="mp-foot"><span class="vpn">VPN</span><span>2 分鐘前</span></div>
+            </div>
+            <div class="mp-card">
+              <div class="mp-card-top"><div class="mp-icon pu">📊</div><div class="mp-status"></div></div>
+              <h4>YF 事件監控</h4>
+              <p>PLC 即時串流</p>
+              <div class="mp-foot"><span class="vpn">VPN</span><span>1 小時前</span></div>
+            </div>
+            <div class="mp-card">
+              <div class="mp-card-top"><div class="mp-icon gn">📁</div><div class="mp-status"></div></div>
+              <h4>毅豐專案紀錄</h4>
+              <p>進度追蹤平台</p>
+              <div class="mp-foot"><span style="color:#86efac">公開</span><span>昨天</span></div>
+            </div>
+          </div>
+
+          <div class="mp-section-title">📂 公司文檔</div>
+          <div class="mp-grid">
+            <div class="mp-card">
+              <div class="mp-card-top"><div class="mp-icon">📚</div><div class="mp-status off"></div></div>
+              <h4>公司文件庫</h4>
+              <p>內部文件索引</p>
+              <div class="mp-foot"><span class="vpn">VPN</span><span>離線</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ROADMAP -->
+    <section id="roadmap">
+      <div class="section-head">
+        <span class="section-num">06 / ROADMAP</span>
+        <h2 class="section-title">實施路線圖</h2>
+        <p class="section-desc">分三階段交付，每階段皆為可獨立部署的 PR。預估總工時 6 週、每週 1 ~ 2 天投入。</p>
+      </div>
+
+      <div class="timeline">
+        <div class="phase" data-phase="1">
+          <div class="phase-head">
+            <div>
+              <div class="phase-num">PHASE 01 · FOUNDATION</div>
+              <h3>地基重構：資料層 + 語意化</h3>
+            </div>
+            <span class="phase-time">Week 1 – 2</span>
+          </div>
+          <p class="phase-goal">把硬編碼的卡片轉為資料驅動，確保後續所有功能都有單一資料來源。同時補齊語意化與無障礙。</p>
+          <div class="phase-tasks">
+            <div class="task"><span class="task-check">✓</span><span class="task-text"><strong>抽離 SYSTEMS JSON：</strong>建立 data/systems.js，包含 id/name/desc/url/category/icon/vpn 欄位。</span></div>
+            <div class="task"><span class="task-check">✓</span><span class="task-text"><strong>實作 renderCards()：</strong>用 &lt;template&gt; + DocumentFragment 動態生成卡片。</span></div>
+            <div class="task"><span class="task-check">✓</span><span class="task-text"><strong>整卡可點：</strong>把 div.card 改 a.card，移除多餘 .btn。</span></div>
+            <div class="task"><span class="task-check">✓</span><span class="task-text"><strong>Landmark 與 aria：</strong>補 &lt;nav&gt;、aria-labelledby、skip link。</span></div>
+            <div class="task"><span class="task-check">✓</span><span class="task-text"><strong>圖示系統：</strong>導入 Lucide inline SVG，icon 由 name 對映。</span></div>
+          </div>
+        </div>
+
+        <div class="phase" data-phase="2">
+          <div class="phase-head">
+            <div>
+              <div class="phase-num">PHASE 02 · INTELLIGENCE</div>
+              <h3>智能化：搜尋 + 狀態 + 個人化</h3>
+            </div>
+            <span class="phase-time">Week 3 – 4</span>
+          </div>
+          <p class="phase-goal">讓入口從「靜態清單」進化為「會回應」的工作台。每個工程師看到的頁面開始反映自身使用習慣。</p>
+          <div class="phase-tasks">
+            <div class="task"><span class="task-check">✓</span><span class="task-text"><strong>⌘K 命令面板：</strong>覆蓋層 + 模糊比對 + 鍵盤上下選擇 + Enter 開啟。</span></div>
+            <div class="task"><span class="task-check">✓</span><span class="task-text"><strong>健康檢查：</strong>fetch(no-cors) 配 2 秒 timeout，顯示綠/灰狀態點。</span></div>
+            <div class="task"><span class="task-check">✓</span><span class="task-text"><strong>localStorage 使用頻率：</strong>每次點擊累計，「我的常用」分區自動排序。</span></div>
+            <div class="task"><span class="task-check">✓</span><span class="task-text"><strong>釘選機制：</strong>卡片右上 ☆ 切換 pinned；釘選優先於使用頻率。</span></div>
+            <div class="task"><span class="task-check">✓</span><span class="task-text"><strong>VPN 狀態自動偵測：</strong>透過任一 VPN URL 的 ping 結果，更新頂部狀態列。</span></div>
+          </div>
+        </div>
+
+        <div class="phase" data-phase="3">
+          <div class="phase-head">
+            <div>
+              <div class="phase-num">PHASE 03 · POLISH</div>
+              <h3>打磨：效能 + 細節 + 文件</h3>
+            </div>
+            <span class="phase-time">Week 5 – 6</span>
+          </div>
+          <p class="phase-goal">將整體完成度推至「可作為公司門面對外展示」的水準，並建立後續維運的文件基礎。</p>
+          <div class="phase-tasks">
+            <div class="task"><span class="task-check">✓</span><span class="task-text"><strong>自託管字型：</strong>Fira Sans + Noto Sans TC woff2 收入 repo，移除外部請求。</span></div>
+            <div class="task"><span class="task-check">✓</span><span class="task-text"><strong>進場動畫：</strong>卡片 IntersectionObserver staggered fade-in；尊重 prefers-reduced-motion。</span></div>
+            <div class="task"><span class="task-check">✓</span><span class="task-text"><strong>404 / Offline 頁：</strong>一致風格的 fallback 頁面。</span></div>
+            <div class="task"><span class="task-check">✓</span><span class="task-text"><strong>Lighthouse ≥ 95：</strong>四項分數線通過。</span></div>
+            <div class="task"><span class="task-check">✓</span><span class="task-text"><strong>維運文件：</strong>README 寫明「如何新增一個系統」三步驟。</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLOSING -->
+    <section id="closing" class="closing">
+      <h3>從入口頁到工作台，只需 6 週</h3>
+      <p>本計畫所有改動皆可在 GitHub Pages 純靜態環境部署，不引入任何建置工具或框架，維持極低的維護成本。在第 1 階段結束時，入口頁就能支援數十個系統而不增加任何 DOM 負擔。</p>
+      <div class="sig">提案 &nbsp;·&nbsp; <strong>Senior Frontend Consultant · Claude Opus 4.7</strong> &nbsp;·&nbsp; 2026.05.28</div>
+    </section>
+  </main>
+</div>
+
+<script>
+// Tabs
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const id=btn.dataset.tab;
+    btn.parentElement.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b===btn));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id===id));
+  });
+});
+
+// Scrollspy
+const navLinks=document.querySelectorAll('nav.toc a');
+const sections=[...navLinks].map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+const spy=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const id=e.target.id;
+      navLinks.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+id));
+    }
+  });
+},{rootMargin:'-30% 0px -60% 0px'});
+sections.forEach(s=>spy.observe(s));
+
+// Mobile menu
+const menuBtn=document.getElementById('menuBtn');
+const sidebar=document.getElementById('sidebar');
+menuBtn?.addEventListener('click',()=>sidebar.classList.toggle('open'));
+sidebar?.addEventListener('click',e=>{if(e.target.tagName==='A')sidebar.classList.remove('open');});
+
+// Animate bars on enter
+const barObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const bar=e.target.querySelector('.sc-bar-fill');
+      if(bar){
+        const w=bar.style.getPropertyValue('--w');
+        bar.style.width='0%';
+        requestAnimationFrame(()=>{ bar.style.width=w; });
+      }
+      barObs.unobserve(e.target);
+    }
+  });
+},{threshold:.3});
+document.querySelectorAll('.scorecard').forEach(c=>barObs.observe(c));
+</script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>找不到頁面 - YU FENG Portal</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100dvh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      background: #0f172a;
+      color: #f1f5f9;
+      font-family: "Segoe UI", "Noto Sans TC", system-ui, sans-serif;
+      line-height: 1.5;
+      padding: 24px;
+    }
+    main {
+      width: min(520px, 100%);
+      border: 1px solid #334155;
+      border-radius: 8px;
+      background: #172033;
+      padding: 28px;
+    }
+    h1 { margin: 0 0 10px; font-size: 1.6rem; }
+    p { color: #94a3b8; margin: 0 0 20px; }
+    a {
+      display: inline-flex;
+      border-radius: 8px;
+      background: #3b82f6;
+      color: white;
+      padding: 10px 14px;
+      text-decoration: none;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>找不到頁面</h1>
+    <p>這個入口頁是 GitHub Pages 靜態站，請回到系統入口重新選擇服務。</p>
+    <a id="homeLink" href="./">回到系統入口</a>
+  </main>
+  <script>
+    const marker = '/portal/';
+    const index = location.pathname.indexOf(marker);
+    const home = index >= 0 ? location.pathname.slice(0, index + marker.length) : './';
+    document.querySelector('#homeLink').href = home;
+  </script>
+</body>
+</html>

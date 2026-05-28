@@ -20,10 +20,19 @@
 
 ```
 portal/
-├── index.html       ← 唯一主要檔案，所有樣式與結構皆內嵌
-├── logo.png         ← Header Logo 圖片
+├── index.html           ← 主入口，僅保留 HTML 骨架（無 inline CSS/JS）
+├── logo.png             ← Header Logo 圖片
+├── assets/
+│   ├── styles.css       ← 外部樣式表（從 inline <style> 抽出）
+│   └── app.js           ← ES module：動態渲染 + ⌘K 搜尋 + 互動邏輯
+├── data/
+│   └── systems.js       ← 系統清單資料（CATEGORIES + SYSTEMS 陣列）
+├── 404.html             ← GitHub Pages 自訂 404 頁
+├── offline.html         ← 離線 fallback 頁
+├── README.md            ← 維運說明（如何新增系統）
+├── proposal.html        ← Opus 4.7 資深顧問評估計畫書（參考用）
 └── .claude/
-    └── CLAUDE.md    ← 本文件
+    └── CLAUDE.md        ← 本文件
 ```
 
 ---
@@ -31,10 +40,13 @@ portal/
 ## 技術規格
 
 - **純靜態 HTML**：無框架、無 Node.js、無建置步驟，直接 GitHub Pages 相容
-- **CSS 全內嵌**：所有樣式寫在 `<style>` 標籤內
+- **CSS**：`assets/styles.css`（外部檔，原 inline `<style>` 已移除）
+- **JS**：`assets/app.js`（ES module，vanilla JS，`<script type="module">`）
+- **資料層**：`data/systems.js`（`export const CATEGORIES / SYSTEMS`，動態渲染）
 - **字型**：Fira Sans（Google Fonts CDN），fallback `"Segoe UI", system-ui`
 - **深色主題**：背景 `#0f172a`，卡片 `#1e293b`；`color-scheme: dark` 已宣告
 - **響應式格線**：`repeat(auto-fit, minmax(260px, 1fr))`
+- **新功能**：⌘K 命令面板搜尋、sidebar 分類篩選、VPN 健康狀態偵測（fetch no-cors）、localStorage 釘選 + 使用頻率個人化
 
 ---
 
@@ -102,39 +114,31 @@ portal/
 
 ---
 
-## 新增卡片方式
+## 新增系統方式
 
-在對應 `<section>` 的 `.grid` 內插入（SVG 替換為合適圖示）：
+**只需編輯 `data/systems.js`**，在 `SYSTEMS` 陣列新增一個物件：
 
-```html
-<div class="card">
-  <div class="card-icon" aria-hidden="true">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" stroke-width="1.75"
-         stroke-linecap="round" stroke-linejoin="round">
-      <!-- Lucide icon path -->
-    </svg>
-  </div>
-  <div class="card-header">
-    <h3>工具名稱</h3>
-    <span class="badge badge-blue">需公司 VPN</span>
-  </div>
-  <p>一行說明</p>
-  <a class="btn" href="URL" target="_blank" rel="noopener">開啟</a>
-</div>
+```js
+{
+  id: 'unique-id',          // 唯一識別碼（kebab-case）
+  categoryId: 'production', // 對應 CATEGORIES 中的 id
+  name: '系統名稱',
+  desc: '一行說明',
+  url: 'http://...',
+  icon: 'cpu',              // 圖示名稱（見 app.js ICONS 對映）
+  vpn: true,                // true = 需公司 VPN（藍色 badge）
+  healthCheck: true,        // true = 啟用 fetch 健康檢查
+}
 ```
 
-公開存取系統：badge 改 `badge-green`，按鈕加 `btn-green`，card-icon 可加 `style="color:#4ade80"`。
+公開系統：`vpn: false`、`healthCheck: false`。
 
 ## 新增分類方式
 
-```html
-<section class="category">
-  <h2 class="category-title">分類名稱</h2>
-  <div class="grid">
-    <!-- 卡片放這裡 -->
-  </div>
-</section>
+在 `data/systems.js` 的 `CATEGORIES` 陣列新增：
+
+```js
+{ id: 'new-cat', label: '分類名稱', icon: 'folder' }
 ```
 
 ---
@@ -148,3 +152,4 @@ portal/
 | 2026-05-02 | 全面排版與視覺改善：響應式斷點、favicon、badge 配色、按鈕分色、VPN 提示欄位置 |
 | 2026-05-02 | Logo 圖片替換文字標題；公司文件庫連結改為 MES /doc/文件導覽.html |
 | 2026-05-22 | UI/UX 改善：emoji 圖示全部換為內嵌 SVG；新增 focus-visible、cursor:pointer、prefers-reduced-motion、color-scheme:dark；字型升級為 Fira Sans；body 改用 100dvh；卡片 hover 加 box-shadow glow |
+| 2026-05-28 | 大型重構：CSS/JS 外移至 assets/；系統清單抽離至 data/systems.js；新增 ⌘K 搜尋、sidebar 導覽、VPN 健康偵測、釘選個人化；新增 404/offline/README；建立 proposal.html（Opus 4.7 資深顧問評估）|
