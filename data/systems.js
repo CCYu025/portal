@@ -17,6 +17,17 @@ export const SYSTEMS = [
     keywords: ['mes', 'production', 'manufacturing', 'robot']
   },
   {
+    id: 'yf-production',
+    name: 'YF 生產儀表板',
+    desc: '六機台生產日報、趨勢分析與製程明細',
+    url: 'http://100.82.186.54:3001/',
+    category: 'production',
+    icon: 'factory',
+    vpn: true,
+    healthCheck: true,
+    keywords: ['production', 'dashboard', 'report', 'trend', 'yf']
+  },
+  {
     id: 'yf-event-monitor',
     name: 'YF 事件監控',
     desc: 'PLC 即時串流、設備事件與異常監看',
